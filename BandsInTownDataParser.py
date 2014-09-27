@@ -1,34 +1,36 @@
+# import the following libraries to perform parsin of the BandsInTown API data
 import json
 import urllib2
 
-# this variable stores the appID we are going to use while hitting the BandsInTown API to extract useful data
-bandsInTownAppID = 'BigRedHacks_2014'
+# this class is used to store the location information of different events where the artists will be performing in the future
+class EventLocationInfo:
 
-# this function is used to return the 'json' response relative to a specific artist which is basically a dictionary consisting of different attributes of the artist
-def getArtistsJsonString(artistName):
-	# refer this for more details - http://www.bandsintown.com/api/1.0/requests#artists-get
-	artistJsonStringResponse = urllib2.urlopen('http://api.bandsintown.com/artists/' + artistName + '.json?app_id=' + bandsInTownAppID)
-	
-	# convert the json response obtained above into a Python dictionary
-	artistJsonStringResponseDictionary = json.load(artistJsonStringResponse)
+	# this is the constructor method for the EventLocationInfo object
+	def __init__(self, eventURL, eventCity, eventVenueName, eventRegion, eventCountry, eventCityLatitude, eventCityLongitude):
+		self.eventURL = eventURL
+		self.eventCity = eventCity
+		self.eventVenueName = eventVenueName
+		self.eventRegion = eventRegion
+		self.eventCountry = eventCountry
+		self.eventCityLatitude = eventCityLatitude
+		self.eventCityLongitude = eventCityLongitude
 
-	return artistJsonStringResponseDictionary
+# this class is used to form an object of type 'Artist' which stores all the information relative to an Artist
+class ArtistInfo:
 
+	# this is the appID we use to access the 'BandsInTown' API
+	bandsInTownAppID = 'BigRedHacks_2014'
 
-# this function is used to return a list of 'dictionaries' where each dictionary constitutes an event and its attributes
-def getArtistsEventsJsonDictionaryList(artistName):
-	# refer this for more details - http://www.bandsintown.com/api/1.0/requests#artists-get
-	artistEventsJsonStringResponse = urllib2.urlopen('http://api.bandsintown.com/artists/' + artistName + '/events.json?app_id=' + bandsInTownAppID)
-	
-	# convert the json response obtained into a Python dictionary
-	artistEventsJsonStringResponseDictionary = json.load(artistEventsJsonStringResponse)
+	# this is the constructor method for the ArtistInfo class which is used to initialize various attributes of the ArtistInfo object
+	def __init__(self, artistName):
 
-	return artistEventsJsonStringResponseDictionary
+		# hit the BandsInTown API to get the list of attributes for the artistName passed using the get request - http://www.bandsintown.com/api/1.0/requests#artists-get 
+		artistInfoJsonResponse = urllib2.urlopen('http://api.bandsintown.com/artists/' + artistName + '.json?app_id=' + bandsInTownAppID)		
+		# convert the json object obtained above into a Python dictionary object
+		artistInfoJsonDictionary = json.load(artistInfoJsonResponse)
 
-if __name__ == '__main__':
-	artistName = raw_input("Enter the artists you are searching for : ")
-	artistsEventList = getArtistsEventsJsonDictionaryList(artistName)
-
-	for event in artistsEventList:
-		print event
-		print
+		# set the different attributes of the ArtistInfo object
+		self.artistName = artistName
+		self.artistURLOnBandsInTown = artistInfoJsonDictionary['url']
+		self.artistMBID = artistInfoJsonDictionary['mbid']
+		self.artistUpcomingEventsCount = artistInfoJsonDictionary['upcoming_events_count']		
