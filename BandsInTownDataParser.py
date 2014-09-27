@@ -15,5 +15,20 @@ def getArtistsJsonString(artistName):
 	return artistJsonStringResponseDictionary
 
 
+# this function is used to return a list of 'dictionaries' where each dictionary constitutes an event and its attributes
+def getArtistsEventsJsonDictionaryList(artistName):
+	# refer this for more details - http://www.bandsintown.com/api/1.0/requests#artists-get
+	artistEventsJsonStringResponse = urllib2.urlopen('http://api.bandsintown.com/artists/' + artistName + '/events.json?app_id=' + bandsInTownAppID)
+	
+	# convert the json response obtained into a Python dictionary
+	artistEventsJsonStringResponseDictionary = json.load(artistEventsJsonStringResponse)
+
+	return artistEventsJsonStringResponseDictionary
+
 if __name__ == '__main__':
-	print getArtistsJsonString('Skrillex')
+	artistName = raw_input("Enter the artists you are searching for : ")
+	artistsEventList = getArtistsEventsJsonDictionaryList(artistName)
+
+	for event in artistsEventList:
+		print event
+		print
