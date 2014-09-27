@@ -1,9 +1,32 @@
 # import the following libraries to perform parsin of the BandsInTown API data
 import re
 import json
+import math
 import urllib2
 import datetime
 import dateutil.parser
+from operator import itemgetter
+
+# this function is used to compute the distance between 2 latitude/longitude pairs relative to earth's radius
+def computeDistanceFromCoordinates(lat1,long1,lat2,long2):
+		
+	# convert latitude and longitude to spherical coordinates in radians.
+    degrees_to_radians = math.pi/180.0
+    	
+    # angles of the 2 co-ordinates in radians based on latitudes of 2 points
+    phi1 = (90.0 - lat1)*degrees_to_radians
+    phi2 = (90.0 - lat2)*degrees_to_radians
+
+    # theta = longitude
+    theta1 = long1*degrees_to_radians
+    theta2 = long2*degrees_to_radians
+
+    # this equation computes the spherical distance
+    cos = (math.sin(phi1)*math.sin(phi2)*math.cos(theta1 - theta2) + math.cos(phi1)*math.cos(phi2))
+    arc = math.acos( cos )
+
+    # this returns the distance of lat2,long2 from lat1,long1 in miles - http://www.johndcook.com/lat_long_details.html
+    return arc*3960
 
 # this class is used to store the different attributes of a Hotel object, these are the hotels that are nearby the event
 class HotelInfo:
@@ -130,5 +153,20 @@ if __name__ == '__main__':
 
 			break;
 
-	for hotels in eventHotelInfoObjects:
-		print hotels.hotelName
+	# this is a list of all hotels sorted in descending order of a cumulative score which is calculated as per the following customer patterns observed - http://corp.marketmetrix.com/how-guests-select-hotels-around-the-world-global-results/
+	hotelListSortedOnCumulativeScore = []
+	for hotel in eventHotelInfoObjects:
+		# first evaluate the distance of the hotel from the event that the customer is trying to visit
+		distanceOfHotelFromVenue = computeDistanceFromCoordinates(float(unicode(userEvent.eventCityLatitude)), float(unicode(userEvent.eventCityLongitude)), hotel.latitude, hotel.longitude)
+
+		# here we compute a cumulative score that is used to best match a hotel to a customer
+		hotelCumulativeScore = 0.04*distanceOfHotelFromVenue + 0.302*hotel.locationScore + 0.157*hotel.pwysRate + 0.033*hotel.starRating + 0.055*hotel.originalRank + 0.075*hotel.diningScore + 0.119*hotel.overallRatingScore		
+		
+		# append the tuple of (hotelCumulativeScore, hotel) to the hotelListSortedOnCumulativeScore list
+		hotelListSortedOnCumulativeScore.append((hotelCumulativeScore, hotel))
+
+	# sort the hotelListSortedOnCumulativeScore based on the descending order of scores and print them
+	hotelListSortedOnCumulativeScore.sort(key = itemgetter(0), reverse=True)
+	for (cumulativeScore, hotel) in hotelListSortedOnCumulativeScore:
+		print hotel.hotelName
+		
