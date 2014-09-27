@@ -1,9 +1,14 @@
 # import the following libraries to perform parsin of the BandsInTown API data
 import re
+import sys
 import json
 import math
+import pprint
+import oauth2
+import urllib
 import urllib2
 import datetime
+import argparse
 import dateutil.parser
 from operator import itemgetter
 
@@ -113,16 +118,16 @@ class ArtistInfo:
 if __name__ == '__main__':
 	
 	# this is the name of the artist that the user entered
-	artistName = raw_input("Enter Artist Name : ")
+	artistName = raw_input("ENTER THE ARTIST WHOSE CONCERT YOU ARE INTERESTED IN VISITING : ")
 	artistInfo = ArtistInfo(artistName)
 	
-	print artistName + " is playing at the following venues -: \n"
+	print artistName + " IS PLAYING AT THE FOLLOWING VENUES -: \n"
 
 	for event in artistInfo.artistEventList:
 		print event.eventVenueName
 
 	# now we prompt the user to enter the venue where he wants to see the band playing
-	userVenue = raw_input("Enter the venue that interests you the most : ")
+	userVenue = raw_input("\nENTER THE VENUE THAT INTERESTS YOU THE MOST : ")
 
 	# this is the event that the user is most interested in visiting
 	userEvent = None
@@ -167,6 +172,11 @@ if __name__ == '__main__':
 
 	# sort the hotelListSortedOnCumulativeScore based on the descending order of scores and print them
 	hotelListSortedOnCumulativeScore.sort(key = itemgetter(0), reverse=True)
+	print '\nTHE LIST OF HOTELS THAT YOU MIGHT WANT TO CONSIDER IN A RANKED ORDER IS AS FOLLOWS -: \n'
 	for (cumulativeScore, hotel) in hotelListSortedOnCumulativeScore:
 		print hotel.hotelName
+
+	# ask the user if he wants to know more about a specific hotel or not
+	specificHotelDetails = raw_input("ENTER THE NAME OF THE HOTEL ABOUT WHICH YOU WOULD LIKE TO KNOW MORE : ")
+	
 		
