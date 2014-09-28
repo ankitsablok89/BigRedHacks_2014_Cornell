@@ -16,7 +16,7 @@ from operator import itemgetter
 API_HOST = 'api.yelp.com'
 DEFAULT_TERM = 'dinner'
 DEFAULT_LOCATION = 'San Francisco, CA'
-SEARCH_LIMIT = 10
+SEARCH_LIMIT = 20
 SEARCH_PATH = '/v2/search/'
 BUSINESS_PATH = '/v2/business/'
 
@@ -274,6 +274,6 @@ if __name__ == '__main__':
 
 		print '\nYOU CAN CONSIDER DINING AT THE FOLLOWING MOST POPULAR RESTAURANTS IN THE AREA -: '
 		for business in response['businesses']:
-			print business['name']
+			print business['name'], ' , contact number : ', business['display_phone']
 	except urllib2.HTTPError as error:
 		sys.exit('Encountered HTTP error {0}. Abort program.'.format(error.code))	
