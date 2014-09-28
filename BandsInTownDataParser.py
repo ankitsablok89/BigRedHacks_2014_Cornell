@@ -7,6 +7,7 @@ import pprint
 import oauth2
 import urllib
 import urllib2
+import pygmaps
 import datetime
 import argparse
 import dateutil.parser
@@ -16,7 +17,7 @@ from operator import itemgetter
 API_HOST = 'api.yelp.com'
 DEFAULT_TERM = 'dinner'
 DEFAULT_LOCATION = 'San Francisco, CA'
-SEARCH_LIMIT = 20
+SEARCH_LIMIT = 10
 SEARCH_PATH = '/v2/search/'
 BUSINESS_PATH = '/v2/business/'
 
@@ -255,17 +256,22 @@ if __name__ == '__main__':
 
 	# sort the hotelListSortedOnCumulativeScore based on the descending order of scores and print them
 	hotelListSortedOnCumulativeScore.sort(key = itemgetter(0), reverse=True)
+
 	print '\nTHE LIST OF HOTELS THAT YOU MIGHT WANT TO CONSIDER IN A RANKED ORDER IS AS FOLLOWS -: \n'
+	mymap = pygmaps.maps(37.428, -122.145, 16)
 	for (cumulativeScore, hotel) in hotelListSortedOnCumulativeScore:
+		mymap.addpoint(hotel.latitude, hotel.longitude,'#FF0000', hotel.hotelName)
 		print hotel.hotelName
+
+	mymap.draw('./mymap.html')
 
 	# ask the user if he wants to know more about a specific hotel or not
 	specificHotelDetails = raw_input("ENTER THE NAME OF THE HOTEL ABOUT WHICH YOU WOULD LIKE TO KNOW MORE : ")
 
 	# now we start working with the Yelp API
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-q', '--term', dest='term', default='restaurants', type=str, help='')
-	parser.add_argument('-l', '--location', dest='location', default=userEvent.eventCity, type=str, help='')
+	parser.add_argument('-q', '--term', dest='term', default=DEFAULT_TERM, type=str, help='')
+	parser.add_argument('-l', '--location', dest='location', default=DEFAULT_LOCATION, type=str, help='')
 	input_values = parser.parse_args()
 
 	try:
@@ -273,7 +279,12 @@ if __name__ == '__main__':
 		response = query_api(input_values.term, input_values.location)
 
 		print '\nYOU CAN CONSIDER DINING AT THE FOLLOWING MOST POPULAR RESTAURANTS IN THE AREA -: '
+
 		for business in response['businesses']:
-			print business['name'], ' , contact number : ', business['display_phone']
+			if 'display_phone' in business.keys():
+				print business['name'], ' , contact number : ', business['display_phone']
+			else:
+				print business['name']
+				
 	except urllib2.HTTPError as error:
 		sys.exit('Encountered HTTP error {0}. Abort program.'.format(error.code))	
