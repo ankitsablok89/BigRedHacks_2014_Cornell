@@ -16,7 +16,7 @@ from operator import itemgetter
 API_HOST = 'api.yelp.com'
 DEFAULT_TERM = 'dinner'
 DEFAULT_LOCATION = 'San Francisco, CA'
-SEARCH_LIMIT = 3
+SEARCH_LIMIT = 10
 SEARCH_PATH = '/v2/search/'
 BUSINESS_PATH = '/v2/business/'
 
@@ -93,23 +93,7 @@ def query_api(term, location):
     """
     response = search(term, location)
 
-    businesses = response.get('businesses')
-
-    if not businesses:
-        print 'No businesses for {0} in {1} found.'.format(term, location)
-        return
-
-    business_id = businesses[0]['id']
-
-    print '{0} businesses found, querying business info for the top result "{1}" ...'.format(
-        len(businesses),
-        business_id
-    )
-
-    response = get_business(business_id)
-
-    print 'Result for business "{0}" found:'.format(business_id)
-    pprint.pprint(response, indent=2)
+    return response
 
 # this function is used to compute the distance between 2 latitude/longitude pairs relative to earth's radius
 def computeDistanceFromCoordinates(lat1,long1,lat2,long2):
@@ -280,10 +264,16 @@ if __name__ == '__main__':
 
 	# now we start working with the Yelp API
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-q', '--term', dest='term', default=DEFAULT_TERM, type=str, help='')
-	parser.add_argument('-l', '--location', dest='location', default=DEFAULT_LOCATION, type=str, help='')
+	parser.add_argument('-q', '--term', dest='term', default='restaurants', type=str, help='')
+	parser.add_argument('-l', '--location', dest='location', default=userEvent.eventCity, type=str, help='')
 	input_values = parser.parse_args()
+
 	try:
-		query_api(input_values.term, input_values.location)
+		# get the response for getting the popular restaurants near the venue that the visitor is trying to visit
+		response = query_api(input_values.term, input_values.location)
+
+		print '\nYOU CAN CONSIDER DINING AT THE FOLLOWING MOST POPULAR RESTAURANTS IN THE AREA -: '
+		for business in response['businesses']:
+			print business['name']
 	except urllib2.HTTPError as error:
 		sys.exit('Encountered HTTP error {0}. Abort program.'.format(error.code))	
